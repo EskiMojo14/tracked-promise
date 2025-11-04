@@ -47,6 +47,29 @@ const _reject = <T, TPromise extends PromiseLike<T>>(
     reason,
   });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const isTrackedPromise = <TPromise extends PromiseLike<any>>(
+  promise: TPromise,
+): promise is TrackedPromise<Awaited<TPromise>, TPromise> =>
+  "status" in promise;
+
+const makeStatusGuard =
+  <TStatus extends TrackedPromise<unknown>["status"]>(status: TStatus) =>
+  <T>(
+    promise: TrackedPromise<T, PromiseLike<T>>,
+  ): promise is Extract<TrackedPromise<T>, { status: TStatus }> =>
+    promise.status === status;
+
+export const isPending = makeStatusGuard("pending");
+export const isFulfilled = makeStatusGuard("fulfilled");
+export const isRejected = makeStatusGuard("rejected");
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const isSettled = <TPromise extends PromiseLike<any>>(
+  promise: TPromise,
+): promise is Settled<Awaited<TPromise>, TPromise> =>
+  isTrackedPromise(promise) && !isPending(promise);
+
 export const resolve = <T>(value: T): Fulfilled<T> =>
   _fulfill(Promise.resolve(value), value);
 
@@ -56,7 +79,6 @@ export function reject<T = never>(reason?: unknown): Rejected<T> {
   promise.catch(() => {
     /* edge cases */
   });
-
   return _reject(promise, reason);
 }
 
@@ -64,11 +86,20 @@ export function reject<T = never>(reason?: unknown): Rejected<T> {
 export function from<TPromise extends PromiseLike<any>>(
   promise: TPromise,
 ): TrackedPromise<Awaited<TPromise>, TPromise> {
+  if (isTrackedPromise(promise)) return promise;
+
   const tracked = _pend(promise);
   tracked.then(
-    (value) => _fulfill(tracked, value),
-    (reason: unknown) => _reject(tracked, reason),
+    (value) => {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      if (isPending(tracked)) _fulfill(tracked, value);
+    },
+    (reason: unknown) => {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      if (isPending(tracked)) _reject(tracked, reason);
+    },
   );
+
   return tracked;
 }
 
@@ -78,14 +109,3 @@ export const create = <T>(
     reject: (reason?: unknown) => void,
   ) => void,
 ): TrackedPromise<T> => from(new Promise(executor));
-
-const makeStatusGuard =
-  <TStatus extends TrackedPromise<unknown>["status"]>(status: TStatus) =>
-  <T>(
-    promise: TrackedPromise<T>,
-  ): promise is Extract<TrackedPromise<T>, { status: TStatus }> =>
-    promise.status === status;
-
-export const isPending = makeStatusGuard("pending");
-export const isFulfilled = makeStatusGuard("fulfilled");
-export const isRejected = makeStatusGuard("rejected");
