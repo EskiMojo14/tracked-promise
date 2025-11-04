@@ -3,7 +3,7 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "target": "ES2020",
+    "target": "esnext",
     "allowJs": true,
     "resolveJsonModule": true,
     "moduleDetection": "force",
@@ -12,7 +12,7 @@
     "moduleResolution": "Bundler",
     "module": "ESNext",
     "noEmit": true,
-    "lib": ["ES2022"],
+    "lib": ["ESNext"],
     "erasableSyntaxOnly": true
   }
 }

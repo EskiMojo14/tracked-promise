@@ -109,3 +109,43 @@ export const create = <T>(
     reject: (reason?: unknown) => void,
   ) => void,
 ): TrackedPromise<T> => from(new Promise(executor));
+
+export interface TrackedPromiseWithResolvers<T> {
+  promise: TrackedPromise<T>;
+  resolve: (value: T | PromiseLike<T>) => void;
+  reject: (reason?: unknown) => void;
+}
+export { type TrackedPromiseWithResolvers as PromiseWithResolvers };
+export function withResolvers<T>(): TrackedPromiseWithResolvers<T> {
+  const { promise, ...resolvers } = Promise.withResolvers<T>();
+  return {
+    promise: from(promise),
+    ...resolvers,
+  };
+}
+
+export interface TrackedPromiseWithResolve<T> {
+  promise: Pending<T> | Fulfilled<T>;
+  resolve: (value: T | PromiseLike<T>) => void;
+}
+export { type TrackedPromiseWithResolve as PromiseWithResolve };
+export function withResolve<T>(): TrackedPromiseWithResolve<T> {
+  const { promise, resolve } = Promise.withResolvers<T>();
+  return {
+    promise: from(promise) as Pending<T> | Fulfilled<T>,
+    resolve,
+  };
+}
+
+export interface TrackedPromiseWithReject {
+  promise: Pending<never> | Rejected<never>;
+  reject: (reason?: unknown) => void;
+}
+export { type TrackedPromiseWithReject as PromiseWithReject };
+export function withReject(): TrackedPromiseWithReject {
+  const { promise, reject } = Promise.withResolvers<never>();
+  return {
+    promise: from(promise) as Pending<never> | Rejected<never>,
+    reject,
+  };
+}

@@ -157,3 +157,60 @@ describe("type guards", () => {
     });
   });
 });
+
+describe("withResolvers", () => {
+  it("should return a pending promise", () => {
+    const { promise } = TrackedPromise.withResolvers();
+    expect(TrackedPromise.isPending(promise)).toBe(true);
+  });
+  it("should resolve the promise", async () => {
+    const { promise, resolve } = TrackedPromise.withResolvers();
+    resolve(1);
+    // will be resolved in the next tick
+    expect(TrackedPromise.isPending(promise)).toBe(true);
+
+    await expect(promise).resolves.toBe(1);
+    expect(TrackedPromise.isFulfilled(promise)).toBe(true);
+  });
+  it("should reject the promise", async () => {
+    const { promise, reject } = TrackedPromise.withResolvers();
+    reject(1);
+    // will be rejected in the next tick
+    expect(TrackedPromise.isPending(promise)).toBe(true);
+
+    await expect(promise).rejects.toBe(1);
+    expect(TrackedPromise.isRejected(promise)).toBe(true);
+  });
+});
+
+describe("withResolve", () => {
+  it("should return a pending promise", () => {
+    const { promise } = TrackedPromise.withResolve();
+    expect(TrackedPromise.isPending(promise)).toBe(true);
+  });
+  it("should resolve the promise", async () => {
+    const { promise, resolve } = TrackedPromise.withResolve();
+    resolve(1);
+    // will be resolved in the next tick
+    expect(TrackedPromise.isPending(promise)).toBe(true);
+
+    await expect(promise).resolves.toBe(1);
+    expect(TrackedPromise.isFulfilled(promise)).toBe(true);
+  });
+});
+
+describe("withReject", () => {
+  it("should return a pending promise", () => {
+    const { promise } = TrackedPromise.withReject();
+    expect(TrackedPromise.isPending(promise)).toBe(true);
+  });
+  it("should reject the promise", async () => {
+    const { promise, reject } = TrackedPromise.withReject();
+    reject(1);
+    // will be rejected in the next tick
+    expect(TrackedPromise.isPending(promise)).toBe(true);
+
+    await expect(promise).rejects.toBe(1);
+    expect(TrackedPromise.isRejected(promise)).toBe(true);
+  });
+});
