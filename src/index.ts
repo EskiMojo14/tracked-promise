@@ -124,12 +124,12 @@ export function withResolvers<T>(): TrackedPromiseWithResolvers<T> {
   };
 }
 
-export interface TrackedPromiseWithResolve<T> {
+export interface TrackedPromiseWithOnlyResolve<T> {
   promise: Pending<T> | Fulfilled<T>;
   resolve: (value: T | PromiseLike<T>) => void;
 }
-export { type TrackedPromiseWithResolve as PromiseWithResolve };
-export function withResolve<T>(): TrackedPromiseWithResolve<T> {
+export { type TrackedPromiseWithOnlyResolve as PromiseWithOnlyResolve };
+export function withOnlyResolve<T>(): TrackedPromiseWithOnlyResolve<T> {
   const { promise, resolve } = Promise.withResolvers<T>();
   return {
     promise: from(promise) as Pending<T> | Fulfilled<T>,
@@ -137,12 +137,12 @@ export function withResolve<T>(): TrackedPromiseWithResolve<T> {
   };
 }
 
-export interface TrackedPromiseWithReject {
+export interface TrackedPromiseWithOnlyReject {
   promise: Pending<never> | Rejected<never>;
   reject: (reason?: unknown) => void;
 }
-export { type TrackedPromiseWithReject as PromiseWithReject };
-export function withReject(): TrackedPromiseWithReject {
+export { type TrackedPromiseWithOnlyReject as PromiseWithOnlyReject };
+export function withOnlyReject(): TrackedPromiseWithOnlyReject {
   const { promise, reject } = Promise.withResolvers<never>();
   return {
     promise: from(promise) as Pending<never> | Rejected<never>,

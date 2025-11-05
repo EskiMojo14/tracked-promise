@@ -183,13 +183,13 @@ describe("withResolvers", () => {
   });
 });
 
-describe("withResolve", () => {
+describe("withOnlyResolve", () => {
   it("should return a pending promise", () => {
-    const { promise } = TrackedPromise.withResolve();
+    const { promise } = TrackedPromise.withOnlyResolve();
     expect(TrackedPromise.isPending(promise)).toBe(true);
   });
   it("should resolve the promise", async () => {
-    const { promise, resolve } = TrackedPromise.withResolve();
+    const { promise, resolve } = TrackedPromise.withOnlyResolve();
     resolve(1);
     // will be resolved in the next tick
     expect(TrackedPromise.isPending(promise)).toBe(true);
@@ -199,13 +199,13 @@ describe("withResolve", () => {
   });
 });
 
-describe("withReject", () => {
+describe("withOnlyReject", () => {
   it("should return a pending promise", () => {
-    const { promise } = TrackedPromise.withReject();
+    const { promise } = TrackedPromise.withOnlyReject();
     expect(TrackedPromise.isPending(promise)).toBe(true);
   });
   it("should reject the promise", async () => {
-    const { promise, reject } = TrackedPromise.withReject();
+    const { promise, reject } = TrackedPromise.withOnlyReject();
     reject(1);
     // will be rejected in the next tick
     expect(TrackedPromise.isPending(promise)).toBe(true);
