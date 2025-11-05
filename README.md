@@ -78,7 +78,7 @@ await ongoingPromise;
 console.log(ongoingPromise.status); // "fulfilled"
 console.log(ongoingPromise.value); // 1
 
-// equivalent to `ongoinPromise instanceof Promise && TrackedPromise.isTrackedPromise(ongoingPromise)`
+// equivalent to `ongoingPromise instanceof Promise && TrackedPromise.isTrackedPromise(ongoingPromise)`
 if (ongoingPromise instanceof TrackedPromise.TrackedPromise) {
   console.log(ongoingPromise.status); // "fulfilled"
   console.log(ongoingPromise.value); // 1
