@@ -115,13 +115,16 @@ const makeStatusGuard =
 
 export const isPending: <TPromise extends AnyPromiseLike>(
   promise: TPromise,
-) => promise is Pending.From<TPromise> = makeStatusGuard("pending");
+) => promise is Pending.From<TPromise> =
+  /* #__PURE__ */ makeStatusGuard("pending");
 export const isFulfilled: <TPromise extends AnyPromiseLike>(
   promise: TPromise,
-) => promise is Fulfilled.From<TPromise> = makeStatusGuard("fulfilled");
+) => promise is Fulfilled.From<TPromise> =
+  /* #__PURE__ */ makeStatusGuard("fulfilled");
 export const isRejected: <TPromise extends AnyPromiseLike>(
   promise: TPromise,
-) => promise is Rejected.From<TPromise> = makeStatusGuard("rejected");
+) => promise is Rejected.From<TPromise> =
+  /* #__PURE__ */ makeStatusGuard("rejected");
 
 export const isSettled = <TPromise extends AnyPromiseLike>(
   promise: TPromise,
