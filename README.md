@@ -89,6 +89,8 @@ if (ongoingPromise instanceof TrackedPromise.TrackedPromise) {
 
 Create a tracked promise from an existing promise. Note that the promise will always be pending until the next tick, even if the existing promise is already settled.
 
+_Warning: mutates the existing promise by adding the necessary tracked promise properties._
+
 ```ts
 const existingPromise = Promise.resolve(1);
 const trackedPromise = TrackedPromise.from(existingPromise);

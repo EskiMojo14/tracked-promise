@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/prefer-promise-reject-errors */
 import { describe, it, expect } from "vitest";
+import { DelayedValue } from "./test-utils";
 import * as TrackedPromise from ".";
 
 const noop = () => {
@@ -56,6 +57,16 @@ describe("from", () => {
 
     expect.assert(TrackedPromise.isRejected(promise));
     expect(promise.reason).toBe(1);
+  });
+  it("will handle a custom thenable", async () => {
+    const promise = TrackedPromise.from(new DelayedValue(1));
+    expect(promise.status).toBe("pending");
+
+    await expect(promise).resolves.toBe(1);
+    expect(promise.status).toBe("fulfilled");
+
+    expect.assert(TrackedPromise.isFulfilled(promise));
+    expect(promise.value).toBe(1);
   });
 });
 
