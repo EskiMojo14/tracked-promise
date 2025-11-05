@@ -18,13 +18,13 @@ describe("reject", () => {
   });
 });
 
-describe("from", () => {
+describe("track", () => {
   it("should return a tracked promise", () => {
-    const promise = TrackedPromise.from(Promise.resolve(1));
+    const promise = TrackedPromise.track(Promise.resolve(1));
     expectTypeOf(promise).toEqualTypeOf<TrackedPromise.Promise<number>>();
   });
   it("should keep the type of the promise", () => {
-    const promise = TrackedPromise.from(delayedValue);
+    const promise = TrackedPromise.track(delayedValue);
     expectTypeOf(promise).toEqualTypeOf<
       TrackedPromise.Promise.From<DelayedValue<number>>
     >();
@@ -62,7 +62,7 @@ describe("type guards", () => {
   const trackedPromise = TrackedPromise.create<number>((resolve) => {
     resolve(1);
   });
-  const trackedSpecialPromise = TrackedPromise.from(delayedValue);
+  const trackedSpecialPromise = TrackedPromise.track(delayedValue);
   describe("isTrackedPromise", () => {
     it("should narrow type to tracked promise", () => {
       if (TrackedPromise.isTrackedPromise(normalPromise)) {

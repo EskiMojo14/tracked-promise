@@ -29,13 +29,13 @@ describe("reject", () => {
   });
 });
 
-describe("from", () => {
+describe("track", () => {
   it("will handle a pending promise", () => {
-    const promise = TrackedPromise.from(new Promise(noop));
+    const promise = TrackedPromise.track(new Promise(noop));
     expect(promise.status).toBe("pending");
   });
   it("will handle a fulfilled promise", async () => {
-    const promise = TrackedPromise.from(Promise.resolve(1));
+    const promise = TrackedPromise.track(Promise.resolve(1));
 
     // will be resolved in the next tick
     expect(promise.status).toBe("pending");
@@ -47,7 +47,7 @@ describe("from", () => {
     expect(promise.value).toBe(1);
   });
   it("will handle a rejected promise", async () => {
-    const promise = TrackedPromise.from(Promise.reject(1));
+    const promise = TrackedPromise.track(Promise.reject(1));
 
     // will be rejected in the next tick
     expect(promise.status).toBe("pending");
@@ -59,7 +59,7 @@ describe("from", () => {
     expect(promise.reason).toBe(1);
   });
   it("will handle a custom thenable", async () => {
-    const promise = TrackedPromise.from(new DelayedValue(1));
+    const promise = TrackedPromise.track(new DelayedValue(1));
     expect(promise.status).toBe("pending");
 
     await expect(promise).resolves.toBe(1);

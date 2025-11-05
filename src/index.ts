@@ -143,7 +143,7 @@ export function reject<T = never>(reason?: unknown): Rejected<T> {
   return _reject(promise, reason);
 }
 
-export function from<TPromise extends AnyPromiseLike>(
+export function track<TPromise extends AnyPromiseLike>(
   promise: TPromise,
 ): TrackedPromise.From<TPromise> {
   if (isTrackedPromise(promise)) return promise;
@@ -167,7 +167,7 @@ export type Executor<T> = (
 ) => void;
 
 export const create = <T>(executor: Executor<T>): TrackedPromise<T> =>
-  from(new Promise(executor));
+  track(new Promise(executor));
 
 export interface TrackedPromiseConstructor {
   new <T>(executor: Executor<T>): TrackedPromise<T>;
@@ -197,7 +197,7 @@ export { type TrackedPromiseWithResolvers as PromiseWithResolvers };
 export function withResolvers<T>(): TrackedPromiseWithResolvers<T> {
   const { promise, ...resolvers } = Promise.withResolvers<T>();
   return {
-    promise: from(promise),
+    promise: track(promise),
     ...resolvers,
   };
 }
@@ -210,7 +210,7 @@ export { type TrackedPromiseWithOnlyResolve as PromiseWithOnlyResolve };
 export function withOnlyResolve<T>(): TrackedPromiseWithOnlyResolve<T> {
   const { promise, resolve } = Promise.withResolvers<T>();
   return {
-    promise: from(promise) as WillResolve<T>,
+    promise: track(promise) as WillResolve<T>,
     resolve,
   };
 }
@@ -223,7 +223,7 @@ export { type TrackedPromiseWithOnlyReject as PromiseWithOnlyReject };
 export function withOnlyReject<T = never>(): TrackedPromiseWithOnlyReject<T> {
   const { promise, reject } = Promise.withResolvers<T>();
   return {
-    promise: from(promise) as WillReject<T>,
+    promise: track(promise) as WillReject<T>,
     reject,
   };
 }

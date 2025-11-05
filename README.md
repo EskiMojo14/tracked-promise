@@ -85,7 +85,7 @@ if (ongoingPromise instanceof TrackedPromise.TrackedPromise) {
 }
 ```
 
-## `TrackedPromise.from`
+## `TrackedPromise.track`
 
 Create a tracked promise from an existing promise. Note that the promise will always be pending until the next tick, even if the existing promise is already settled.
 
@@ -93,7 +93,7 @@ _Warning: mutates the existing promise by adding the necessary tracked promise p
 
 ```ts
 const existingPromise = Promise.resolve(1);
-const trackedPromise = TrackedPromise.from(existingPromise);
+const trackedPromise = TrackedPromise.track(existingPromise);
 console.log(trackedPromise.status); // "pending"
 
 await trackedPromise;
@@ -101,12 +101,12 @@ console.log(trackedPromise.status); // "fulfilled"
 console.log(trackedPromise.value); // 1
 ```
 
-Note that `TrackedPromise.from` calls `promise.then` immediately, which may lead to unexpected behaviour with custom thenables.
+Note that `TrackedPromise.track` calls `promise.then` immediately, which may lead to unexpected behaviour with custom thenables.
 
 ```ts
 const getPosts = db.query.posts.findMany();
 // a fetch happens here
-const getPostsTracked = TrackedPromise.from(getPosts);
+const getPostsTracked = TrackedPromise.track(getPosts);
 
 // so if we update posts
 await db.update(posts).set({ title: "New Title" }).where(eq(posts.id, 1));
