@@ -121,9 +121,10 @@ export type Executor<T> = (
 export const create = <T>(executor: Executor<T>): TrackedPromise<T> =>
   from(new Promise(executor));
 
-export type TrackedPromiseConstructor = new <T>(
-  executor: Executor<T>,
-) => TrackedPromise<T>;
+export interface TrackedPromiseConstructor {
+  new <T>(executor: Executor<T>): TrackedPromise<T>;
+  <T>(executor: Executor<T>): TrackedPromise<T>;
+}
 
 export const TrackedPromise: TrackedPromiseConstructor = function <T>(
   executor: Executor<T>,

@@ -91,33 +91,48 @@ describe("create", () => {
 });
 
 describe("TrackedPromise", () => {
-  it("should return a pending promise", () => {
-    const promise = new TrackedPromise.TrackedPromise(noop);
-    expect(promise.status).toBe("pending");
-  });
-  it("should return a fulfilled promise", async () => {
-    const promise = new TrackedPromise.TrackedPromise((resolve) => {
-      resolve(1);
+  describe.each([
+    ["with", true],
+    ["without", false],
+  ])("%s new keyword", (withNew) => {
+    it("should return a pending promise", () => {
+      const promise = withNew
+        ? new TrackedPromise.TrackedPromise(noop)
+        : TrackedPromise.create(noop);
+      expect(promise.status).toBe("pending");
     });
-    expect(promise.status).toBe("pending");
+    it("should return a fulfilled promise", async () => {
+      const promise = withNew
+        ? new TrackedPromise.TrackedPromise((resolve) => {
+            resolve(1);
+          })
+        : TrackedPromise.create((resolve) => {
+            resolve(1);
+          });
+      expect(promise.status).toBe("pending");
 
-    await expect(promise).resolves.toBe(1);
-    expect(promise.status).toBe("fulfilled");
+      await expect(promise).resolves.toBe(1);
+      expect(promise.status).toBe("fulfilled");
 
-    expect.assert(TrackedPromise.isFulfilled(promise));
-    expect(promise.value).toBe(1);
-  });
-  it("should return a rejected promise", async () => {
-    const promise = new TrackedPromise.TrackedPromise((_, reject) => {
-      reject(1);
+      expect.assert(TrackedPromise.isFulfilled(promise));
+      expect(promise.value).toBe(1);
     });
-    expect(promise.status).toBe("pending");
+    it("should return a rejected promise", async () => {
+      const promise = withNew
+        ? new TrackedPromise.TrackedPromise((_, reject) => {
+            reject(1);
+          })
+        : TrackedPromise.TrackedPromise((_, reject) => {
+            reject(1);
+          });
+      expect(promise.status).toBe("pending");
 
-    await expect(promise).rejects.toBe(1);
-    expect(promise.status).toBe("rejected");
+      await expect(promise).rejects.toBe(1);
+      expect(promise.status).toBe("rejected");
 
-    expect.assert(TrackedPromise.isRejected(promise));
-    expect(promise.reason).toBe(1);
+      expect.assert(TrackedPromise.isRejected(promise));
+      expect(promise.reason).toBe(1);
+    });
   });
 });
 

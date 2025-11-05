@@ -60,9 +60,9 @@ console.log(ongoingPromise.status); // "fulfilled"
 console.log(ongoingPromise.value); // 1
 ```
 
-## `new TrackedPromise.TrackedPromise`
+## `TrackedPromise.TrackedPromise`
 
-A wrapper for `TrackedPromise.create` that can be used with the `new` keyword. Matches the behavior of `new Promise(executor)`.
+A wrapper for `TrackedPromise.create` that can optionally be used with the `new` keyword. Matches the behavior of `new Promise(executor)`.
 
 ```ts
 const ongoingPromise = new TrackedPromise.TrackedPromise((resolve) => {
