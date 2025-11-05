@@ -35,24 +35,24 @@ export { type TrackedPromise as Promise };
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyPromiseLike = PromiseLike<any>;
 
-const _pend = <T, TPromise extends PromiseLike<T>>(
+const _pend = <TPromise extends AnyPromiseLike>(
   promise: TPromise,
-): Pending<T, TPromise> =>
+): Pending<Awaited<TPromise>, TPromise> =>
   Object.assign(promise, {
     status: "pending" as const,
   });
-const _fulfill = <T, TPromise extends PromiseLike<T>>(
+const _fulfill = <TPromise extends AnyPromiseLike>(
   promise: TPromise,
-  value: T,
-): Fulfilled<T, TPromise> =>
+  value: Awaited<TPromise>,
+): Fulfilled<Awaited<TPromise>, TPromise> =>
   Object.assign(promise, {
     status: "fulfilled" as const,
     value,
   });
-const _reject = <T, TPromise extends PromiseLike<T>>(
+const _reject = <TPromise extends AnyPromiseLike>(
   promise: TPromise,
   reason: unknown,
-): Rejected<T, TPromise> =>
+): Rejected<Awaited<TPromise>, TPromise> =>
   Object.assign(promise, {
     status: "rejected" as const,
     reason,
@@ -83,7 +83,7 @@ export const isSettled = <TPromise extends AnyPromiseLike>(
   isTrackedPromise(promise) && !isPending(promise);
 
 export const resolve = <T>(value: T): Fulfilled<T> =>
-  _fulfill(Promise.resolve(value), value);
+  _fulfill(Promise.resolve(value), value as never);
 
 export function reject<T = never>(reason?: unknown): Rejected<T> {
   // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
