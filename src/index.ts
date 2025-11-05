@@ -22,6 +22,14 @@ export type TrackedPromise<T, TPromise extends PromiseLike<T> = Promise<T>> =
   | Pending<T, TPromise>
   | Settled<T, TPromise>;
 
+export type WillResolve<T, TPromise extends PromiseLike<T> = Promise<T>> =
+  | Pending<T, TPromise>
+  | Fulfilled<T, TPromise>;
+
+export type WillReject<T, TPromise extends PromiseLike<T> = Promise<T>> =
+  | Pending<T, TPromise>
+  | Rejected<T, TPromise>;
+
 export { type TrackedPromise as Promise };
 
 const _pend = <T, TPromise extends PromiseLike<T>>(
@@ -125,27 +133,27 @@ export function withResolvers<T>(): TrackedPromiseWithResolvers<T> {
 }
 
 export interface TrackedPromiseWithOnlyResolve<T> {
-  promise: Pending<T> | Fulfilled<T>;
+  promise: WillResolve<T>;
   resolve: (value: T | PromiseLike<T>) => void;
 }
 export { type TrackedPromiseWithOnlyResolve as PromiseWithOnlyResolve };
 export function withOnlyResolve<T>(): TrackedPromiseWithOnlyResolve<T> {
   const { promise, resolve } = Promise.withResolvers<T>();
   return {
-    promise: from(promise) as Pending<T> | Fulfilled<T>,
+    promise: from(promise) as WillResolve<T>,
     resolve,
   };
 }
 
 export interface TrackedPromiseWithOnlyReject {
-  promise: Pending<never> | Rejected<never>;
+  promise: WillReject<never>;
   reject: (reason?: unknown) => void;
 }
 export { type TrackedPromiseWithOnlyReject as PromiseWithOnlyReject };
 export function withOnlyReject(): TrackedPromiseWithOnlyReject {
   const { promise, reject } = Promise.withResolvers<never>();
   return {
-    promise: from(promise) as Pending<never> | Rejected<never>,
+    promise: from(promise) as WillReject<never>,
     reject,
   };
 }
