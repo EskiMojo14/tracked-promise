@@ -39,6 +39,15 @@ describe("create", () => {
   });
 });
 
+describe("TrackedPromise", () => {
+  it("should return a tracked promise", () => {
+    const promise = new TrackedPromise.TrackedPromise<number>((resolve) => {
+      resolve(1);
+    });
+    expectTypeOf(promise).toEqualTypeOf<TrackedPromise.Promise<number>>();
+  });
+});
+
 describe("type guards", () => {
   const normalPromise = Promise.resolve(1);
   const trackedPromise = TrackedPromise.create<number>((resolve) => {

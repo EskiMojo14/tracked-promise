@@ -60,6 +60,23 @@ console.log(ongoingPromise.status); // "fulfilled"
 console.log(ongoingPromise.value); // 1
 ```
 
+## `new TrackedPromise.TrackedPromise`
+
+A wrapper for `TrackedPromise.create` that can be used with the `new` keyword. Matches the behavior of `new Promise(executor)`.
+
+```ts
+const ongoingPromise = new TrackedPromise.TrackedPromise((resolve) => {
+  setTimeout(() => {
+    resolve(1);
+  }, 1000);
+});
+console.log(ongoingPromise.status); // "pending"
+
+await ongoingPromise;
+console.log(ongoingPromise.status); // "fulfilled"
+console.log(ongoingPromise.value); // 1
+```
+
 ## `TrackedPromise.from`
 
 Create a tracked promise from an existing promise. Note that the promise will always be pending until the next tick, even if the existing promise is already settled.

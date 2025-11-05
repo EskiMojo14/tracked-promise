@@ -113,12 +113,23 @@ export function from<TPromise extends AnyPromiseLike>(
   return tracked;
 }
 
-export const create = <T>(
-  executor: (
-    resolve: (value: T | PromiseLike<T>) => void,
-    reject: (reason?: unknown) => void,
-  ) => void,
-): TrackedPromise<T> => from(new Promise(executor));
+export type Executor<T> = (
+  resolve: (value: T | PromiseLike<T>) => void,
+  reject: (reason?: unknown) => void,
+) => void;
+
+export const create = <T>(executor: Executor<T>): TrackedPromise<T> =>
+  from(new Promise(executor));
+
+export type TrackedPromiseConstructor = new <T>(
+  executor: Executor<T>,
+) => TrackedPromise<T>;
+
+export const TrackedPromise: TrackedPromiseConstructor = function <T>(
+  executor: Executor<T>,
+) {
+  return create(executor);
+} as never;
 
 export interface TrackedPromiseWithResolvers<T> {
   promise: TrackedPromise<T>;
