@@ -63,9 +63,13 @@ export const isTrackedPromise = <TPromise extends PromiseLike<any>>(
 
 const makeStatusGuard =
   <TStatus extends TrackedPromise<unknown>["status"]>(status: TStatus) =>
-  <T>(
-    promise: TrackedPromise<T, PromiseLike<T>>,
-  ): promise is Extract<TrackedPromise<T>, { status: TStatus }> =>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  <TPromise extends PromiseLike<any>>(
+    promise: TPromise & { status?: unknown },
+  ): promise is Extract<
+    TrackedPromise<Awaited<TPromise>, TPromise>,
+    { status: TStatus }
+  > =>
     promise.status === status;
 
 export const isPending = makeStatusGuard("pending");
@@ -99,11 +103,9 @@ export function from<TPromise extends PromiseLike<any>>(
   const tracked = _pend(promise);
   tracked.then(
     (value) => {
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       if (isPending(tracked)) _fulfill(tracked, value);
     },
     (reason: unknown) => {
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       if (isPending(tracked)) _reject(tracked, reason);
     },
   );
