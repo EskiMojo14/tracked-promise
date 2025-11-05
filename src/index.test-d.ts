@@ -111,22 +111,22 @@ describe("type guards", () => {
     it("should narrow type to rejected promise", () => {
       if (TrackedPromise.isRejected(normalPromise)) {
         expectTypeOf(normalPromise).toEqualTypeOf<
-          TrackedPromise.Rejected<Promise<number>>
+          TrackedPromise.Rejected<number, Promise<number>>
         >();
       }
       if (TrackedPromise.isRejected(specialPromise)) {
         expectTypeOf(specialPromise).toEqualTypeOf<
-          TrackedPromise.Rejected<typeof specialPromise>
+          TrackedPromise.Rejected<number, typeof specialPromise>
         >();
       }
       if (TrackedPromise.isRejected(trackedPromise)) {
         expectTypeOf(trackedPromise).toEqualTypeOf<
-          TrackedPromise.Rejected<Promise<number>>
+          TrackedPromise.Rejected<number, Promise<number>>
         >();
       }
       if (TrackedPromise.isRejected(trackedSpecialPromise)) {
         expectTypeOf(trackedSpecialPromise).toEqualTypeOf<
-          TrackedPromise.Rejected<typeof specialPromise>
+          TrackedPromise.Rejected<number, typeof specialPromise>
         >();
       }
     });

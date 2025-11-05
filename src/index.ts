@@ -12,13 +12,14 @@ export type Fulfilled<
 > = TPromise & { status: "fulfilled"; value: T };
 
 export type Rejected<
-  TPromise extends AnyPromiseLike = Promise<never>,
+  T = never,
+  TPromise extends PromiseLike<T> = Promise<T>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 > = TPromise & { status: "rejected"; reason: any };
 
 export type Settled<T, TPromise extends PromiseLike<T> = Promise<T>> =
   | Fulfilled<T, TPromise>
-  | Rejected<TPromise>;
+  | Rejected<T, TPromise>;
 
 export type TrackedPromise<T, TPromise extends PromiseLike<T> = Promise<T>> =
   | Pending<T, TPromise>
@@ -28,9 +29,10 @@ export type WillResolve<T, TPromise extends PromiseLike<T> = Promise<T>> =
   | Pending<T, TPromise>
   | Fulfilled<T, TPromise>;
 
-export type WillReject<TPromise extends PromiseLike<never> = Promise<never>> =
-  | Pending<never, TPromise>
-  | Rejected<TPromise>;
+export type WillReject<
+  T = never,
+  TPromise extends PromiseLike<T> = Promise<T>,
+> = Pending<T, TPromise> | Rejected<T, TPromise>;
 
 export { type TrackedPromise as Promise };
 
@@ -51,7 +53,7 @@ const _fulfill = <TPromise extends AnyPromiseLike>(
 const _reject = <TPromise extends AnyPromiseLike>(
   promise: TPromise,
   reason: unknown,
-): Rejected<TPromise> =>
+): Rejected<Awaited<TPromise>, TPromise> =>
   Object.assign(promise, {
     status: "rejected" as const,
     reason,
@@ -84,7 +86,7 @@ export const isSettled = <TPromise extends AnyPromiseLike>(
 export const resolve = <T>(value: T): Fulfilled<T> =>
   _fulfill(Promise.resolve(value), value as never);
 
-export function reject(reason?: unknown): Rejected {
+export function reject<T = never>(reason?: unknown): Rejected<T> {
   // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
   const promise = Promise.reject(reason);
   promise.catch(() => {
@@ -145,15 +147,15 @@ export function withOnlyResolve<T>(): TrackedPromiseWithOnlyResolve<T> {
   };
 }
 
-export interface TrackedPromiseWithOnlyReject {
-  promise: WillReject;
+export interface TrackedPromiseWithOnlyReject<T = never> {
+  promise: WillReject<T>;
   reject: (reason?: unknown) => void;
 }
 export { type TrackedPromiseWithOnlyReject as PromiseWithOnlyReject };
-export function withOnlyReject(): TrackedPromiseWithOnlyReject {
-  const { promise, reject } = Promise.withResolvers<never>();
+export function withOnlyReject<T = never>(): TrackedPromiseWithOnlyReject<T> {
+  const { promise, reject } = Promise.withResolvers<T>();
   return {
-    promise: from(promise) as WillReject<never>,
+    promise: from(promise) as WillReject<T>,
     reject,
   };
 }
