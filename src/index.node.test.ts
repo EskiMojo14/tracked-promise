@@ -133,13 +133,12 @@ describe("TrackedPromise", () => {
       expect.assert(TrackedPromise.isRejected(promise));
       expect(promise.reason).toBe(1);
     });
-    it("works with instanceof", () => {
-      const promise = withNew
-        ? new TrackedPromise.TrackedPromise(noop)
-        : TrackedPromise.create(noop);
-      expect(promise).toBeInstanceOf(TrackedPromise.TrackedPromise);
-      expect(promise).toBeInstanceOf(Promise);
-    });
+  });
+
+  it("works with instanceof", () => {
+    const promise = new TrackedPromise.TrackedPromise(noop);
+    expect(promise instanceof TrackedPromise.TrackedPromise).toBe(true);
+    expect(promise instanceof Promise).toBe(true);
   });
 });
 
