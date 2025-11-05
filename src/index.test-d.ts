@@ -13,7 +13,7 @@ describe("resolve", () => {
 describe("reject", () => {
   it("should return a rejected promise", () => {
     const promise = TrackedPromise.reject(1);
-    expectTypeOf(promise).toEqualTypeOf<TrackedPromise.Rejected<never>>();
+    expectTypeOf(promise).toEqualTypeOf<TrackedPromise.Rejected>();
   });
 });
 
@@ -111,22 +111,22 @@ describe("type guards", () => {
     it("should narrow type to rejected promise", () => {
       if (TrackedPromise.isRejected(normalPromise)) {
         expectTypeOf(normalPromise).toEqualTypeOf<
-          TrackedPromise.Rejected<number>
+          TrackedPromise.Rejected<Promise<number>>
         >();
       }
       if (TrackedPromise.isRejected(specialPromise)) {
         expectTypeOf(specialPromise).toEqualTypeOf<
-          TrackedPromise.Rejected<number, typeof specialPromise>
+          TrackedPromise.Rejected<typeof specialPromise>
         >();
       }
       if (TrackedPromise.isRejected(trackedPromise)) {
         expectTypeOf(trackedPromise).toEqualTypeOf<
-          TrackedPromise.Rejected<number>
+          TrackedPromise.Rejected<Promise<number>>
         >();
       }
       if (TrackedPromise.isRejected(trackedSpecialPromise)) {
         expectTypeOf(trackedSpecialPromise).toEqualTypeOf<
-          TrackedPromise.Rejected<number, typeof specialPromise>
+          TrackedPromise.Rejected<typeof specialPromise>
         >();
       }
     });
@@ -183,7 +183,7 @@ describe("withOnlyResolve", () => {
 describe("withOnlyReject", () => {
   it("should return a tracked promise and rejector", () => {
     const { promise, reject, ...rest } = TrackedPromise.withOnlyReject();
-    expectTypeOf(promise).toEqualTypeOf<TrackedPromise.WillReject<never>>();
+    expectTypeOf(promise).toEqualTypeOf<TrackedPromise.WillReject>();
     expectTypeOf(reject).toEqualTypeOf<(reason?: unknown) => void>();
     expectTypeOf(rest).toEqualTypeOf<{}>();
   });
