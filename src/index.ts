@@ -77,7 +77,7 @@ export namespace WillReject {
   >;
 }
 
-export { type TrackedPromise as Promise };
+export { TrackedPromise as Promise };
 
 const _pend = <TPromise extends AnyPromiseLike>(
   promise: TPromise,
@@ -177,6 +177,11 @@ export const TrackedPromise: TrackedPromiseConstructor = function <T>(
 ) {
   return create(executor);
 } as never;
+
+Object.defineProperty(TrackedPromise, Symbol.hasInstance, {
+  value: (instance: unknown) =>
+    instance instanceof Promise && isTrackedPromise(instance),
+});
 
 export interface TrackedPromiseWithResolvers<T> {
   promise: TrackedPromise<T>;

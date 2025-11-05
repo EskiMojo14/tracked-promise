@@ -46,6 +46,14 @@ describe("TrackedPromise", () => {
     });
     expectTypeOf(promise).toEqualTypeOf<TrackedPromise.Promise<number>>();
   });
+  it("can be used with instanceof", () => {
+    const promise = new TrackedPromise.TrackedPromise<number>((resolve) => {
+      resolve(1);
+    });
+    if (promise instanceof TrackedPromise.TrackedPromise) {
+      expectTypeOf(promise).toEqualTypeOf<TrackedPromise.Promise<number>>();
+    }
+  });
 });
 
 describe("type guards", () => {

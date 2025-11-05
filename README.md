@@ -64,6 +64,8 @@ console.log(ongoingPromise.value); // 1
 
 A wrapper for `TrackedPromise.create` that can optionally be used with the `new` keyword. Matches the behavior of `new Promise(executor)`.
 
+Also overrides the `Symbol.hasInstance` method to allow for type checking with `instanceof`.
+
 ```ts
 const ongoingPromise = new TrackedPromise.TrackedPromise((resolve) => {
   setTimeout(() => {
@@ -75,6 +77,12 @@ console.log(ongoingPromise.status); // "pending"
 await ongoingPromise;
 console.log(ongoingPromise.status); // "fulfilled"
 console.log(ongoingPromise.value); // 1
+
+// equivalent to `ongoinPromise instanceof Promise && TrackedPromise.isTrackedPromise(ongoingPromise)`
+if (ongoingPromise instanceof TrackedPromise.TrackedPromise) {
+  console.log(ongoingPromise.status); // "fulfilled"
+  console.log(ongoingPromise.value); // 1
+}
 ```
 
 ## `TrackedPromise.from`
