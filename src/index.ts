@@ -32,6 +32,9 @@ export type WillReject<T, TPromise extends PromiseLike<T> = Promise<T>> =
 
 export { type TrackedPromise as Promise };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyPromiseLike = PromiseLike<any>;
+
 const _pend = <T, TPromise extends PromiseLike<T>>(
   promise: TPromise,
 ): Pending<T, TPromise> =>
@@ -55,16 +58,14 @@ const _reject = <T, TPromise extends PromiseLike<T>>(
     reason,
   });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const isTrackedPromise = <TPromise extends PromiseLike<any>>(
+export const isTrackedPromise = <TPromise extends AnyPromiseLike>(
   promise: TPromise,
 ): promise is TrackedPromise<Awaited<TPromise>, TPromise> =>
   "status" in promise;
 
 const makeStatusGuard =
   <TStatus extends TrackedPromise<unknown>["status"]>(status: TStatus) =>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  <TPromise extends PromiseLike<any>>(
+  <TPromise extends AnyPromiseLike>(
     promise: TPromise & { status?: unknown },
   ): promise is Extract<
     TrackedPromise<Awaited<TPromise>, TPromise>,
@@ -76,8 +77,7 @@ export const isPending = makeStatusGuard("pending");
 export const isFulfilled = makeStatusGuard("fulfilled");
 export const isRejected = makeStatusGuard("rejected");
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const isSettled = <TPromise extends PromiseLike<any>>(
+export const isSettled = <TPromise extends AnyPromiseLike>(
   promise: TPromise,
 ): promise is Settled<Awaited<TPromise>, TPromise> =>
   isTrackedPromise(promise) && !isPending(promise);
@@ -94,8 +94,7 @@ export function reject<T = never>(reason?: unknown): Rejected<T> {
   return _reject(promise, reason);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function from<TPromise extends PromiseLike<any>>(
+export function from<TPromise extends AnyPromiseLike>(
   promise: TPromise,
 ): TrackedPromise<Awaited<TPromise>, TPromise> {
   if (isTrackedPromise(promise)) return promise;
