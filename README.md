@@ -101,6 +101,21 @@ console.log(trackedPromise.status); // "fulfilled"
 console.log(trackedPromise.value); // 1
 ```
 
+Note that `TrackedPromise.from` calls `promise.then` immediately, which may lead to unexpected behaviour with custom thenables.
+
+```ts
+const getPosts = db.query.posts.findMany();
+// a fetch happens here
+const getPostsTracked = TrackedPromise.from(getPosts);
+
+// so if we update posts
+await db.update(posts).set({ title: "New Title" }).where(eq(posts.id, 1));
+
+// fetch happens again here
+const result = await getPostsTracked;
+// but getPostsTracked.value is still the old data
+```
+
 ## `TrackedPromise.withResolvers`
 
 Create a tracked promise with resolvers. Matches the behavior of `Promise.withResolvers`.
