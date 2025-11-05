@@ -171,17 +171,19 @@ export interface TrackedPromiseConstructor {
   <T>(executor: Executor<T>): TrackedPromise<T>;
 }
 
-// eslint-disable-next-line import-x/export
-export const TrackedPromise: TrackedPromiseConstructor = function <T>(
-  executor: Executor<T>,
-) {
-  return create(executor);
-} as never;
+function makeConstructor(): TrackedPromiseConstructor {
+  function TrackedPromise<T>(executor: Executor<T>): TrackedPromise<T> {
+    return create(executor);
+  }
+  Object.defineProperty(TrackedPromise, Symbol.hasInstance, {
+    value: (instance: unknown) =>
+      instance instanceof Promise && isTrackedPromise(instance),
+  });
+  return TrackedPromise as never;
+}
 
-Object.defineProperty(TrackedPromise, Symbol.hasInstance, {
-  value: (instance: unknown) =>
-    instance instanceof Promise && isTrackedPromise(instance),
-});
+// eslint-disable-next-line import-x/export
+export const TrackedPromise = /* #__PURE__ */ makeConstructor();
 
 export interface TrackedPromiseWithResolvers<T> {
   promise: TrackedPromise<T>;
