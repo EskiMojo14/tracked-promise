@@ -74,9 +74,18 @@ const makeStatusGuard =
   > =>
     promise.status === status;
 
-export const isPending = makeStatusGuard("pending");
-export const isFulfilled = makeStatusGuard("fulfilled");
-export const isRejected = makeStatusGuard("rejected");
+export const isPending: <TPromise extends AnyPromiseLike>(
+  promise: TPromise,
+) => promise is Pending<Awaited<TPromise>, TPromise> =
+  makeStatusGuard("pending");
+export const isFulfilled: <TPromise extends AnyPromiseLike>(
+  promise: TPromise,
+) => promise is Fulfilled<Awaited<TPromise>, TPromise> =
+  makeStatusGuard("fulfilled");
+export const isRejected: <TPromise extends AnyPromiseLike>(
+  promise: TPromise,
+) => promise is Rejected<Awaited<TPromise>, TPromise> =
+  makeStatusGuard("rejected");
 
 export const isSettled = <TPromise extends AnyPromiseLike>(
   promise: TPromise,
