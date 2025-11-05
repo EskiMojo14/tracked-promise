@@ -5,47 +5,90 @@ export type Pending<
   T,
   TPromise extends PromiseLike<T> = Promise<T>,
 > = TPromise & { status: "pending" };
+export namespace Pending {
+  export type From<TPromise extends AnyPromiseLike> = Pending<
+    Awaited<TPromise>,
+    TPromise
+  >;
+}
 
 export type Fulfilled<
   T,
   TPromise extends PromiseLike<T> = Promise<T>,
 > = TPromise & { status: "fulfilled"; value: T };
+export namespace Fulfilled {
+  export type From<TPromise extends AnyPromiseLike> = Fulfilled<
+    Awaited<TPromise>,
+    TPromise
+  >;
+}
 
 export type Rejected<
   T = never,
   TPromise extends PromiseLike<T> = Promise<T>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 > = TPromise & { status: "rejected"; reason: any };
+export namespace Rejected {
+  export type From<TPromise extends AnyPromiseLike> = Rejected<
+    Awaited<TPromise>,
+    TPromise
+  >;
+}
 
 export type Settled<T, TPromise extends PromiseLike<T> = Promise<T>> =
   | Fulfilled<T, TPromise>
   | Rejected<T, TPromise>;
+export namespace Settled {
+  export type From<TPromise extends AnyPromiseLike> = Settled<
+    Awaited<TPromise>,
+    TPromise
+  >;
+}
 
 export type TrackedPromise<T, TPromise extends PromiseLike<T> = Promise<T>> =
   | Pending<T, TPromise>
   | Settled<T, TPromise>;
+// eslint-disable-next-line import-x/export
+export namespace TrackedPromise {
+  export type From<TPromise extends AnyPromiseLike> = TrackedPromise<
+    Awaited<TPromise>,
+    TPromise
+  >;
+}
 
 export type WillResolve<T, TPromise extends PromiseLike<T> = Promise<T>> =
   | Pending<T, TPromise>
   | Fulfilled<T, TPromise>;
+export namespace WillResolve {
+  export type From<TPromise extends AnyPromiseLike> = WillResolve<
+    Awaited<TPromise>,
+    TPromise
+  >;
+}
 
 export type WillReject<
   T = never,
   TPromise extends PromiseLike<T> = Promise<T>,
 > = Pending<T, TPromise> | Rejected<T, TPromise>;
+export namespace WillReject {
+  export type From<TPromise extends AnyPromiseLike> = WillReject<
+    Awaited<TPromise>,
+    TPromise
+  >;
+}
 
 export { type TrackedPromise as Promise };
 
 const _pend = <TPromise extends AnyPromiseLike>(
   promise: TPromise,
-): Pending<Awaited<TPromise>, TPromise> =>
+): Pending.From<TPromise> =>
   Object.assign(promise, {
     status: "pending" as const,
   });
 const _fulfill = <TPromise extends AnyPromiseLike>(
   promise: TPromise,
   value: Awaited<TPromise>,
-): Fulfilled<Awaited<TPromise>, TPromise> =>
+): Fulfilled.From<TPromise> =>
   Object.assign(promise, {
     status: "fulfilled" as const,
     value,
@@ -53,7 +96,7 @@ const _fulfill = <TPromise extends AnyPromiseLike>(
 const _reject = <TPromise extends AnyPromiseLike>(
   promise: TPromise,
   reason: unknown,
-): Rejected<Awaited<TPromise>, TPromise> =>
+): Rejected.From<TPromise> =>
   Object.assign(promise, {
     status: "rejected" as const,
     reason,
@@ -61,35 +104,28 @@ const _reject = <TPromise extends AnyPromiseLike>(
 
 export const isTrackedPromise = <TPromise extends AnyPromiseLike>(
   promise: TPromise,
-): promise is TrackedPromise<Awaited<TPromise>, TPromise> =>
-  "status" in promise;
+): promise is TrackedPromise.From<TPromise> => "status" in promise;
 
 const makeStatusGuard =
   <TStatus extends TrackedPromise<unknown>["status"]>(status: TStatus) =>
   <TPromise extends AnyPromiseLike>(
     promise: TPromise & { status?: unknown },
-  ): promise is Extract<
-    TrackedPromise<Awaited<TPromise>, TPromise>,
-    { status: TStatus }
-  > =>
+  ): promise is Extract<TrackedPromise.From<TPromise>, { status: TStatus }> =>
     promise.status === status;
 
 export const isPending: <TPromise extends AnyPromiseLike>(
   promise: TPromise,
-) => promise is Pending<Awaited<TPromise>, TPromise> =
-  makeStatusGuard("pending");
+) => promise is Pending.From<TPromise> = makeStatusGuard("pending");
 export const isFulfilled: <TPromise extends AnyPromiseLike>(
   promise: TPromise,
-) => promise is Fulfilled<Awaited<TPromise>, TPromise> =
-  makeStatusGuard("fulfilled");
+) => promise is Fulfilled.From<TPromise> = makeStatusGuard("fulfilled");
 export const isRejected: <TPromise extends AnyPromiseLike>(
   promise: TPromise,
-) => promise is Rejected<Awaited<TPromise>, TPromise> =
-  makeStatusGuard("rejected");
+) => promise is Rejected.From<TPromise> = makeStatusGuard("rejected");
 
 export const isSettled = <TPromise extends AnyPromiseLike>(
   promise: TPromise,
-): promise is Settled<Awaited<TPromise>, TPromise> =>
+): promise is Settled.From<TPromise> =>
   isTrackedPromise(promise) && !isPending(promise);
 
 export const resolve = <T>(value: T): Fulfilled<T> =>
@@ -106,7 +142,7 @@ export function reject<T = never>(reason?: unknown): Rejected<T> {
 
 export function from<TPromise extends AnyPromiseLike>(
   promise: TPromise,
-): TrackedPromise<Awaited<TPromise>, TPromise> {
+): TrackedPromise.From<TPromise> {
   if (isTrackedPromise(promise)) return promise;
 
   const tracked = _pend(promise);
@@ -135,6 +171,7 @@ export interface TrackedPromiseConstructor {
   <T>(executor: Executor<T>): TrackedPromise<T>;
 }
 
+// eslint-disable-next-line import-x/export
 export const TrackedPromise: TrackedPromiseConstructor = function <T>(
   executor: Executor<T>,
 ) {

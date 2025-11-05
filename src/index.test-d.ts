@@ -25,7 +25,7 @@ describe("from", () => {
   it("should keep the type of the promise", () => {
     const promise = TrackedPromise.from(specialPromise);
     expectTypeOf(promise).toEqualTypeOf<
-      TrackedPromise.Promise<number, typeof specialPromise>
+      TrackedPromise.Promise.From<typeof specialPromise>
     >();
   });
 });
@@ -63,7 +63,7 @@ describe("type guards", () => {
       }
       if (TrackedPromise.isTrackedPromise(specialPromise)) {
         expectTypeOf(specialPromise).toEqualTypeOf<
-          TrackedPromise.Promise<number, typeof specialPromise>
+          TrackedPromise.Promise.From<typeof specialPromise>
         >();
       }
     });
@@ -77,7 +77,7 @@ describe("type guards", () => {
       }
       if (TrackedPromise.isPending(specialPromise)) {
         expectTypeOf(specialPromise).toEqualTypeOf<
-          TrackedPromise.Pending<number, typeof specialPromise>
+          TrackedPromise.Pending.From<typeof specialPromise>
         >();
       }
       if (TrackedPromise.isPending(trackedPromise)) {
@@ -87,7 +87,7 @@ describe("type guards", () => {
       }
       if (TrackedPromise.isPending(trackedSpecialPromise)) {
         expectTypeOf(trackedSpecialPromise).toEqualTypeOf<
-          TrackedPromise.Pending<number, typeof specialPromise>
+          TrackedPromise.Pending.From<typeof specialPromise>
         >();
       }
     });
@@ -101,7 +101,7 @@ describe("type guards", () => {
       }
       if (TrackedPromise.isFulfilled(specialPromise)) {
         expectTypeOf(specialPromise).toEqualTypeOf<
-          TrackedPromise.Fulfilled<number, typeof specialPromise>
+          TrackedPromise.Fulfilled.From<typeof specialPromise>
         >();
       }
       if (TrackedPromise.isFulfilled(trackedPromise)) {
@@ -111,7 +111,7 @@ describe("type guards", () => {
       }
       if (TrackedPromise.isFulfilled(trackedSpecialPromise)) {
         expectTypeOf(trackedSpecialPromise).toEqualTypeOf<
-          TrackedPromise.Fulfilled<number, typeof specialPromise>
+          TrackedPromise.Fulfilled.From<typeof specialPromise>
         >();
       }
     });
@@ -125,7 +125,7 @@ describe("type guards", () => {
       }
       if (TrackedPromise.isRejected(specialPromise)) {
         expectTypeOf(specialPromise).toEqualTypeOf<
-          TrackedPromise.Rejected<number, typeof specialPromise>
+          TrackedPromise.Rejected.From<typeof specialPromise>
         >();
       }
       if (TrackedPromise.isRejected(trackedPromise)) {
@@ -135,7 +135,7 @@ describe("type guards", () => {
       }
       if (TrackedPromise.isRejected(trackedSpecialPromise)) {
         expectTypeOf(trackedSpecialPromise).toEqualTypeOf<
-          TrackedPromise.Rejected<number, typeof specialPromise>
+          TrackedPromise.Rejected.From<typeof specialPromise>
         >();
       }
     });
@@ -149,7 +149,7 @@ describe("type guards", () => {
       }
       if (TrackedPromise.isSettled(specialPromise)) {
         expectTypeOf(specialPromise).toEqualTypeOf<
-          TrackedPromise.Settled<number, typeof specialPromise>
+          TrackedPromise.Settled.From<typeof specialPromise>
         >();
       }
       if (TrackedPromise.isSettled(trackedPromise)) {
@@ -159,7 +159,7 @@ describe("type guards", () => {
       }
       if (TrackedPromise.isSettled(trackedSpecialPromise)) {
         expectTypeOf(trackedSpecialPromise).toEqualTypeOf<
-          TrackedPromise.Settled<number, typeof specialPromise>
+          TrackedPromise.Settled.From<typeof specialPromise>
         >();
       }
     });
