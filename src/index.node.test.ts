@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/prefer-promise-reject-errors */
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { DelayedValue } from "./test-utils";
 import * as TrackedPromise from ".";
 
@@ -79,8 +79,11 @@ describe("track", () => {
     expect(promise.reason).toBe(1);
   });
   it("will handle a custom thenable", async () => {
-    const promise = TrackedPromise.track(new DelayedValue(1));
+    const delayedValue = new DelayedValue(1);
+    const thenSpy = vi.spyOn(delayedValue, "then");
+    const promise = TrackedPromise.track(delayedValue);
     expect(promise.status).toBe("pending");
+    expect(thenSpy).toHaveBeenCalled();
 
     await expect(promise).resolves.toBe(1);
     expect(promise.status).toBe("fulfilled");
