@@ -72,7 +72,7 @@ _`TrackedPromise.reject` will not check if the promise is already rejected. It w
 Create a tracked promise from an executor function. Matches the behavior of `new Promise(executor)`.
 
 ```ts
-const ongoingPromise = TrackedPromise.create((resolve) => {
+const ongoingPromise = TrackedPromise.create<number>((resolve) => {
   setTimeout(() => {
     resolve(1);
   }, 1000);
@@ -91,7 +91,7 @@ A wrapper for `TrackedPromise.create` that can optionally be used with the `new`
 Also overrides the `Symbol.hasInstance` method to allow for type checking with `instanceof`.
 
 ```ts
-const ongoingPromise = new TrackedPromise.TrackedPromise((resolve) => {
+const ongoingPromise = new TrackedPromise.TrackedPromise<number>((resolve) => {
   setTimeout(() => {
     resolve(1);
   }, 1000);

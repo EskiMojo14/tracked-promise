@@ -108,10 +108,32 @@ export const isSettled = <TPromise extends AnyPromiseLike>(
 ): promise is Settled.From<TPromise> =>
   isTrackedPromise(promise) && !isPending(promise);
 
+/**
+ * Mark a promise (or thenable) as resolved, assigning the `status` and `value` properties.
+ * *Will not check if the promise is already resolved.*
+ * @param promise Promise to mark as resolved
+ * @param value Value to assign to the promise
+ * @returns The promise, typed as fulfilled
+ * @example
+ * const promise = Promise.resolve(1);
+ * const trackedPromise = TrackedPromise.resolve(promise, 1);
+ * console.log(trackedPromise === promise); // true
+ * console.log(trackedPromise.status); // "fulfilled"
+ * console.log(trackedPromise.value); // 1
+ */
 export function resolve<TPromise extends AnyPromiseLike>(
   promise: TPromise,
   value: Awaited<TPromise>,
 ): Fulfilled.From<TPromise>;
+/**
+ * Create a resolved promise.
+ * @param value Value for the promise to resolve to
+ * @returns A fulfilled promise
+ * @example
+ * const promise = TrackedPromise.resolve(1);
+ * console.log(promise.status); // "fulfilled"
+ * console.log(promise.value); // 1
+ */
 export function resolve<T>(value: T): Fulfilled<T>;
 export function resolve(
   valueOrPromise: unknown,
@@ -126,10 +148,32 @@ export function resolve(
   return resolve(Promise.resolve(valueOrPromise), valueOrPromise);
 }
 
+/**
+ * Mark a promise (or thenable) as rejected, assigning the `status` and `reason` properties.
+ * *Will not check if the promise is already rejected.*
+ * @param promise Promise to mark as rejected
+ * @param reason Reason to assign to the promise
+ * @returns The promise, typed as rejected
+ * @example
+ * const promise = Promise.reject(1);
+ * const trackedPromise = TrackedPromise.reject(promise, 1);
+ * console.log(trackedPromise === promise); // true
+ * console.log(trackedPromise.status); // "rejected"
+ * console.log(trackedPromise.reason); // 1
+ */
 export function reject<TPromise extends AnyPromiseLike>(
   promise: TPromise,
   reason: unknown,
 ): Rejected.From<TPromise>;
+/**
+ * Create a rejected promise.
+ * @param reason Reason for the promise to reject
+ * @returns A rejected promise
+ * @example
+ * const promise = TrackedPromise.reject(1);
+ * console.log(promise.status); // "rejected"
+ * console.log(promise.reason); // 1
+ */
 export function reject<T = never>(reason?: unknown): Rejected<T>;
 export function reject(
   promiseOrReason?: unknown,
@@ -149,6 +193,22 @@ export function reject(
   return reject(promise, promiseOrReason);
 }
 
+/**
+ * Create a tracked promise from an existing promise or thenable.
+ * _Note that the promise will always be pending until the next tick, even if the existing promise is already settled._
+ * @param promise Promise or thenable to track
+ * @returns The tracked promise
+ * @remarks Calls `promise.then` immediately, which may lead to unexpected behaviour with custom thenables.
+ * @example
+ * const existingPromise = Promise.resolve(1);
+ * const trackedPromise = TrackedPromise.track(existingPromise);
+ * console.log(trackedPromise === existingPromise); // true
+ * console.log(trackedPromise.status); // "pending"
+ *
+ * await trackedPromise;
+ * console.log(trackedPromise.status); // "fulfilled"
+ * console.log(trackedPromise.value); // 1
+ */
 export function track<TPromise extends AnyPromiseLike>(
   promise: TPromise,
 ): TrackedPromise.From<TPromise> {
@@ -169,11 +229,24 @@ export function track<TPromise extends AnyPromiseLike>(
   return tracked;
 }
 
-export type Executor<T> = (
-  resolve: (value: T | PromiseLike<T>) => void,
-  reject: (reason?: unknown) => void,
-) => void;
+export type Resolver<T> = (value: T | PromiseLike<T>) => void;
+export type Rejector = (reason?: unknown) => void;
+export type Executor<T> = (resolve: Resolver<T>, reject: Rejector) => void;
 
+/**
+ * Create a tracked promise from an executor function. Matches the behavior of `new Promise(executor)`.
+ * @param executor Executor function
+ * @returns A tracked promise
+ * @example
+ * const promise = TrackedPromise.create<number>((resolve) => {
+ *   resolve(1);
+ * });
+ * console.log(promise.status); // "pending"
+ *
+ * await promise;
+ * console.log(promise.status); // "fulfilled"
+ * console.log(promise.value); // 1
+ */
 export const create = <T>(executor: Executor<T>): TrackedPromise<T> =>
   track(new Promise(executor));
 
@@ -193,15 +266,44 @@ function makeConstructor(): TrackedPromiseConstructor {
   return TrackedPromise as never;
 }
 
+/**
+ * A wrapper for `TrackedPromise.create` that can optionally be used with the `new` keyword. Matches the behavior of `new Promise(executor)`.
+ * *Also overrides the `Symbol.hasInstance` method to allow for type checking with `instanceof`.*
+ * @see {@link create}
+ * @example
+ * const promise = new TrackedPromise.TrackedPromise<number>((resolve) => {
+ *   resolve(1);
+ * });
+ * console.log(promise.status); // "pending"
+ *
+ * await promise;
+ * console.log(promise.status); // "fulfilled"
+ * console.log(promise.value); // 1
+ *
+ * console.log(promise instanceof Promise); // true
+ * // equivalent to `promise instanceof Promise && TrackedPromise.isTrackedPromise(promise)`
+ * console.log(promise instanceof TrackedPromise.TrackedPromise); // true
+ */
 // eslint-disable-next-line import-x/export
 export const TrackedPromise = /* #__PURE__ */ makeConstructor();
 
 export interface TrackedPromiseWithResolvers<T> {
   promise: TrackedPromise<T>;
-  resolve: (value: T | PromiseLike<T>) => void;
-  reject: (reason?: unknown) => void;
+  resolve: Resolver<T>;
+  reject: Rejector;
 }
 export { type TrackedPromiseWithResolvers as PromiseWithResolvers };
+/**
+ * Create a tracked promise with resolvers. Matches the behavior of `Promise.withResolvers`.
+ * @returns An object containing the promise and its resolvers
+ * @example
+ * const { promise, resolve, reject } = TrackedPromise.withResolvers<number>();
+ * console.log(promise.status); // "pending"
+ * resolve(1);
+ * await promise;
+ * console.log(promise.status); // "fulfilled"
+ * console.log(promise.value); // 1
+ */
 export function withResolvers<T>(): TrackedPromiseWithResolvers<T> {
   const { promise, ...resolvers } = Promise.withResolvers<T>();
   return {
@@ -212,9 +314,21 @@ export function withResolvers<T>(): TrackedPromiseWithResolvers<T> {
 
 export interface TrackedPromiseWithOnlyResolve<T> {
   promise: WillResolve<T>;
-  resolve: (value: T | PromiseLike<T>) => void;
+  resolve: Resolver<T>;
 }
 export { type TrackedPromiseWithOnlyResolve as PromiseWithOnlyResolve };
+/**
+ * Create a tracked promise with only a resolver. Matches the behavior of `Promise.withResolvers`, but without the rejector.
+ * @returns An object containing the promise and its resolver
+ * @example
+ * const { promise, resolve } = TrackedPromise.withOnlyResolve<number>();
+ * console.log(promise.status); // "pending"
+ *
+ * resolve(1);
+ * await promise;
+ * console.log(promise.status); // "fulfilled"
+ * console.log(promise.value); // 1
+ */
 export function withOnlyResolve<T>(): TrackedPromiseWithOnlyResolve<T> {
   const { promise, resolve } = Promise.withResolvers<T>();
   return {
@@ -225,9 +339,21 @@ export function withOnlyResolve<T>(): TrackedPromiseWithOnlyResolve<T> {
 
 export interface TrackedPromiseWithOnlyReject<T = never> {
   promise: WillReject<T>;
-  reject: (reason?: unknown) => void;
+  reject: Rejector;
 }
 export { type TrackedPromiseWithOnlyReject as PromiseWithOnlyReject };
+/**
+ * Create a tracked promise with only a rejector. Matches the behavior of `Promise.withResolvers`, but without the resolver.
+ * @returns An object containing the promise and its rejector
+ * @example
+ * const { promise, reject } = TrackedPromise.withOnlyReject();
+ * console.log(promise.status); // "pending"
+ *
+ * reject(1);
+ * await promise.catch(() => {});
+ * console.log(promise.status); // "rejected"
+ * console.log(promise.reason); // 1
+ */
 export function withOnlyReject<T = never>(): TrackedPromiseWithOnlyReject<T> {
   const { promise, reject } = Promise.withResolvers<T>();
   return {
