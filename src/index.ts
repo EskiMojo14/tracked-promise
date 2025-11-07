@@ -79,29 +79,6 @@ export namespace WillReject {
 
 export { TrackedPromise as Promise };
 
-const _pend = <TPromise extends AnyPromiseLike>(
-  promise: TPromise,
-): Pending.From<TPromise> =>
-  Object.assign(promise, {
-    status: "pending" as const,
-  });
-const _fulfill = <TPromise extends AnyPromiseLike>(
-  promise: TPromise,
-  value: Awaited<TPromise>,
-): Fulfilled.From<TPromise> =>
-  Object.assign(promise, {
-    status: "fulfilled" as const,
-    value,
-  });
-const _reject = <TPromise extends AnyPromiseLike>(
-  promise: TPromise,
-  reason: unknown,
-): Rejected.From<TPromise> =>
-  Object.assign(promise, {
-    status: "rejected" as const,
-    reason,
-  });
-
 export const isTrackedPromise = <TPromise extends AnyPromiseLike>(
   promise: TPromise,
 ): promise is TrackedPromise.From<TPromise> => "status" in promise;
@@ -131,16 +108,45 @@ export const isSettled = <TPromise extends AnyPromiseLike>(
 ): promise is Settled.From<TPromise> =>
   isTrackedPromise(promise) && !isPending(promise);
 
-export const resolve = <T>(value: T): Fulfilled<T> =>
-  _fulfill(Promise.resolve(value), value as never);
+export function resolve<TPromise extends AnyPromiseLike>(
+  promise: TPromise,
+  value: Awaited<TPromise>,
+): Fulfilled.From<TPromise>;
+export function resolve<T>(value: T): Fulfilled<T>;
+export function resolve(
+  valueOrPromise: unknown,
+  value?: unknown,
+): Fulfilled<unknown, AnyPromiseLike> {
+  if (arguments.length === 2) {
+    return Object.assign(valueOrPromise as AnyPromiseLike, {
+      status: "fulfilled" as const,
+      value,
+    });
+  }
+  return resolve(Promise.resolve(valueOrPromise), valueOrPromise);
+}
 
-export function reject<T = never>(reason?: unknown): Rejected<T> {
+export function reject<TPromise extends AnyPromiseLike>(
+  promise: TPromise,
+  reason: unknown,
+): Rejected.From<TPromise>;
+export function reject<T = never>(reason?: unknown): Rejected<T>;
+export function reject(
+  promiseOrReason?: unknown,
+  reason?: unknown,
+): Rejected<unknown, AnyPromiseLike> {
+  if (arguments.length === 2) {
+    return Object.assign(promiseOrReason as AnyPromiseLike, {
+      status: "rejected" as const,
+      reason,
+    });
+  }
   // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
-  const promise = Promise.reject(reason);
+  const promise = Promise.reject(promiseOrReason);
   promise.catch(() => {
     /* edge cases */
   });
-  return _reject(promise, reason);
+  return reject(promise, promiseOrReason);
 }
 
 export function track<TPromise extends AnyPromiseLike>(
@@ -148,13 +154,15 @@ export function track<TPromise extends AnyPromiseLike>(
 ): TrackedPromise.From<TPromise> {
   if (isTrackedPromise(promise)) return promise;
 
-  const tracked = _pend(promise);
+  const tracked = Object.assign(promise, {
+    status: "pending" as const,
+  });
   tracked.then(
     (value) => {
-      if (isPending(tracked)) _fulfill(tracked, value);
+      if (isPending(tracked)) resolve(tracked, value);
     },
     (reason: unknown) => {
-      if (isPending(tracked)) _reject(tracked, reason);
+      if (isPending(tracked)) reject(tracked, reason);
     },
   );
 

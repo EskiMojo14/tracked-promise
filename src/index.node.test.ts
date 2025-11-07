@@ -16,12 +16,32 @@ describe("resolve", () => {
 
     await expect(promise).resolves.toBe(1);
   });
+  it("should resolve a promise", async () => {
+    const resolvedPromise = Promise.resolve(1);
+    const promise = TrackedPromise.resolve(resolvedPromise, 1);
+
+    expect(resolvedPromise).toBe(promise);
+    expect(promise.status).toBe("fulfilled");
+    expect(promise.value).toBe(1);
+
+    await expect(promise).resolves.toBe(1);
+  });
 });
 
 describe("reject", () => {
   it("should return a rejected promise", async () => {
     const promise = TrackedPromise.reject(1);
 
+    expect(promise.status).toBe("rejected");
+    expect(promise.reason).toBe(1);
+
+    await expect(promise).rejects.toBe(1);
+  });
+  it("should reject a promise", async () => {
+    const rejectedPromise = Promise.reject(1);
+    const promise = TrackedPromise.reject(rejectedPromise, 1);
+
+    expect(rejectedPromise).toBe(promise);
     expect(promise.status).toBe("rejected");
     expect(promise.reason).toBe(1);
 

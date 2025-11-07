@@ -9,12 +9,39 @@ describe("resolve", () => {
     const promise = TrackedPromise.resolve(1);
     expectTypeOf(promise).toEqualTypeOf<TrackedPromise.Fulfilled<number>>();
   });
+  it("should resolve a promise", () => {
+    const resolvedPromise = Promise.resolve(1);
+    const promise = TrackedPromise.resolve(resolvedPromise, 1);
+    expectTypeOf(promise).toEqualTypeOf<
+      TrackedPromise.Fulfilled<number, typeof resolvedPromise>
+    >();
+  });
+  it("should resolve a thenable", () => {
+    const promise = TrackedPromise.resolve(delayedValue, 1);
+    expectTypeOf(promise).toEqualTypeOf<
+      TrackedPromise.Fulfilled<number, typeof delayedValue>
+    >();
+  });
 });
 
 describe("reject", () => {
   it("should return a rejected promise", () => {
     const promise = TrackedPromise.reject(1);
     expectTypeOf(promise).toEqualTypeOf<TrackedPromise.Rejected>();
+  });
+  it("should reject a promise", () => {
+    // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+    const rejectedPromise = Promise.reject(1);
+    const promise = TrackedPromise.reject(rejectedPromise, 1);
+    expectTypeOf(promise).toEqualTypeOf<
+      TrackedPromise.Rejected<number, typeof rejectedPromise>
+    >();
+  });
+  it("should reject a thenable", () => {
+    const promise = TrackedPromise.reject(delayedValue, 1);
+    expectTypeOf(promise).toEqualTypeOf<
+      TrackedPromise.Rejected<number, typeof delayedValue>
+    >();
   });
 });
 

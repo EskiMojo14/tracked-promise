@@ -33,6 +33,18 @@ console.log(resolvedPromise.status); // "fulfilled"
 console.log(resolvedPromise.value); // 1
 ```
 
+Alternatively, you can pass in an existing promise or thenable to resolve, with its resolution value.
+
+```ts
+const resolvedPromise = Promise.resolve(1);
+const trackedPromise = TrackedPromise.resolve(resolvedPromise, 1);
+console.log(trackedPromise === resolvedPromise); // true
+console.log(trackedPromise.status); // "fulfilled"
+console.log(trackedPromise.value); // 1
+```
+
+_`TrackedPromise.resolve` will not check if the promise is already resolved. It will only assign the `status` and `value` properties._
+
 ## `TrackedPromise.reject`
 
 Returns a rejected promise.
@@ -42,6 +54,18 @@ const rejectedPromise = TrackedPromise.reject(1);
 console.log(rejectedPromise.status); // "rejected"
 console.log(rejectedPromise.reason); // 1
 ```
+
+Alternatively, you can pass in an existing promise or thenable to reject, with its rejection reason.
+
+```ts
+const rejectedPromise = Promise.reject(1);
+const trackedPromise = TrackedPromise.reject(rejectedPromise, 1);
+console.log(trackedPromise === rejectedPromise); // true
+console.log(trackedPromise.status); // "rejected"
+console.log(trackedPromise.reason); // 1
+```
+
+_`TrackedPromise.reject` will not check if the promise is already rejected. It will only assign the `status` and `reason` properties._
 
 ## `TrackedPromise.create`
 
